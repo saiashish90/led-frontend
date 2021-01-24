@@ -1,4 +1,4 @@
-import { React, useState, useEffect } from "react";
+import { React, useState } from "react";
 import "./css/App.css";
 import Signin from "./Signin";
 
@@ -17,27 +17,61 @@ if (!firebase.apps.length) {
 } else {
   firebase.app(); // if already initialized, use that one
 }
+var database = firebase.database();
 
 function App() {
   const [signedin, setSignedin] = useState(false);
-  useEffect(() => {
-    firebase.auth().onAuthStateChanged((user) => {
-      if (user) {
-        setSignedin(true);
-      } else setSignedin(false);
-    });
-  });
-  let leds = 1;
-  let divs = [];
-  while (leds--) {
-    divs.push(
-      <div id="led1" className="light">
-        <input type="checkbox" name="power" id="power" />
-      </div>
-    );
+  const [leds, setLeds] = useState([]);
+  let userID;
+
+  function powerOn(e) {
+    let path;
+    let checked;
+    if (e.target.tagName === "DIV") {
+      e.target.querySelector("input").checked = !e.target.querySelector("input")
+        .checked;
+      checked = e.target.querySelector("input").checked;
+      path = `${userID}/${e.target.id}/is_on`;
+      console.log(path);
+    } else {
+      checked = e.target.checked;
+      path = `${userID}/${e.target.parentElement.id}/is_on`;
+      console.log(path);
+    }
+    database.ref().update({ [path]: checked });
   }
+
+  firebase.auth().onAuthStateChanged((user) => {
+    if (user) {
+      setSignedin(true);
+    } else setSignedin(false);
+  });
+
   if (signedin) {
-    return <div>helooo</div>;
+    let divs = [];
+    userID = firebase.auth().currentUser.email.split("@")[0];
+    if (leds.length === 0 || leds === undefined) {
+      database
+        .ref(`/${userID}/`)
+        .once("value")
+        .then((snapshot) => {
+          setLeds(snapshot.val());
+        });
+    } else {
+      Object.keys(leds).forEach((key) => {
+        divs.push(
+          <div key={key} id={key} onClick={powerOn} className="light">
+            <input
+              type="checkbox"
+              defaultChecked={leds[key]["is_on"]}
+              name="power"
+              id="power"
+            />
+          </div>
+        );
+      });
+    }
+    return <div>{divs}</div>;
   } else return <Signin></Signin>;
 }
 
