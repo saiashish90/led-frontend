@@ -1,0 +1,30 @@
+:root {
+  --nm: 6px 6px 16px 0 rgba(0, 0, 0, 0.2),
+    -6px -6px 16px 0 rgba(255, 255, 255, 1);
+  --nm-inset: inset 4px 4px 8px 0 rgba(0, 0, 0, 0.2),
+    inset -4px -4px 8px 0 rgba(255, 255, 255, 0.8);
+
+  --nm-button: 5px 5px 10px rgba(0, 0, 0, 0.2),
+    -5px -5px 10px rgba(255, 255, 255, 1);
+  --nm-button-inset: inset 5px 5px 10px rgba(0, 0, 0, 0.2),
+    inset -5px -5px 10px rgba(255, 255, 255, 1);
+
+  --concave: linear-gradient(
+    145deg,
+    rgba(0, 0, 0, 0.2),
+    rgba(255, 255, 255, 1)
+  );
+  --bg-color: #e0e5ec;
+}
+
+.App {
+  display: flex;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+.container {
+  margin: auto;
+}
