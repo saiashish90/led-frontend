@@ -8,7 +8,7 @@ var database = firebase.database();
 
 function App() {
   const [user, loading] = useAuthState(firebase.auth());
-  const [leds, setLeds] = useState([]);
+  const [setLeds] = useState([]);
   function powerOn(e, userID) {
     let path;
     let checked;
@@ -32,28 +32,41 @@ function App() {
   if (user) {
     let divs = [];
     let userID = firebase.auth().currentUser.email.split("@")[0];
-    if (leds.length === 0 || leds === undefined) {
+    let lsleds = {};
+    if (localStorage.getItem("leds") === null) {
       database
         .ref(`/${userID}/`)
         .once("value")
         .then((snapshot) => {
+          localStorage.setItem("leds", JSON.stringify(snapshot.val()));
           setLeds(snapshot.val());
         });
     } else {
-      Object.keys(leds).forEach((key) => {
-        divs.push(
-          <div
-            key={key}
-            id={key}
-            onClick={(e) => {
-              powerOn(e, userID);
-            }}
-            className="light">
-            <input type="checkbox" defaultChecked={leds[key]["is_on"]} name="power" id="power" />
-          </div>
-        );
-      });
+      lsleds = JSON.parse(localStorage.getItem("leds"));
     }
+    database.ref(`/${userID}/`).on("value", (snapshot) => {
+      localStorage.setItem("leds", JSON.stringify(snapshot.val()));
+      if (JSON.stringify(Object.keys(snapshot.val())) !== JSON.stringify(Object.keys(lsleds))) {
+        lsleds = JSON.parse(localStorage.getItem("leds"));
+        setLeds(lsleds);
+      } else {
+        lsleds = JSON.parse(localStorage.getItem("leds"));
+      }
+    });
+    Object.keys(lsleds).forEach((key) => {
+      divs.push(
+        <div
+          key={key}
+          id={key}
+          onClick={(e) => {
+            powerOn(e, userID);
+          }}
+          className="light">
+          <input type="checkbox" defaultChecked={lsleds[key]["is_on"]} name="power" id="power" />
+        </div>
+      );
+    });
+
     return <div>{divs}</div>;
   }
   return <button onClick={Signin}>Sign in</button>;
