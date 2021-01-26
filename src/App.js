@@ -8,7 +8,7 @@ var database = firebase.database();
 
 function App() {
   const [user, loading] = useAuthState(firebase.auth());
-  const [setLeds] = useState([]);
+  const [, setLeds] = useState([]);
   function powerOn(e, userID) {
     let path;
     let checked;
@@ -16,11 +16,14 @@ function App() {
       e.target.querySelector("input").checked = !e.target.querySelector("input").checked;
       checked = e.target.querySelector("input").checked;
       path = `${userID}/${e.target.id}/is_on`;
-      console.log(path);
+      e.target.className = checked ? "power on" : "power off";
     } else {
-      checked = e.target.checked;
+      e.target.parentElement.querySelector("input").checked = !e.target.parentElement.querySelector(
+        "input"
+      ).checked;
+      checked = e.target.parentElement.querySelector("input").checked;
       path = `${userID}/${e.target.parentElement.id}/is_on`;
-      console.log(path);
+      e.target.parentElement.className = checked ? "power on" : "power off";
     }
     database.ref().update({ [path]: checked });
   }
@@ -55,19 +58,28 @@ function App() {
     });
     Object.keys(lsleds).forEach((key) => {
       divs.push(
-        <div
-          key={key}
-          id={key}
-          onClick={(e) => {
-            powerOn(e, userID);
-          }}
-          className="light">
-          <input type="checkbox" defaultChecked={lsleds[key]["is_on"]} name="power" id="power" />
+        <div className="container">
+          <div
+            key={key}
+            id={key}
+            onClick={(e) => {
+              powerOn(e, userID);
+            }}
+            className={lsleds[key]["is_on"] ? "power on" : "power off"}>
+            <input
+              type="checkbox"
+              defaultChecked={lsleds[key]["is_on"]}
+              name="power"
+              id="power"
+              hidden
+            />
+            <img src="/power.svg" style={{ height: "25px" }} alt="" />
+          </div>
         </div>
       );
     });
 
-    return <div>{divs}</div>;
+    return <div className="App">{divs}</div>;
   }
   return <button onClick={Signin}>Sign in</button>;
 }
